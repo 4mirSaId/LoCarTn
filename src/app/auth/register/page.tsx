@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 
 export default function RegisterPage() {
     const router = useRouter()
@@ -29,21 +30,20 @@ export default function RegisterPage() {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(formData),
-        })
-        const data = await res.json()
+        });
         if (res.ok) {
-            console.log('Login successful:', data)
+            const data = await res.json()
             // Handle successful login (e.g., redirect, show success message)
-            localStorage.setItem('role', data.role);
-            if (data.role === 'admin') {
-                router.push('/admin/dashboard');
-            } else if (data.role === 'client') {
-                router.push('/client/dashboard');
-            } else if (data.role === 'uagency') {
-                router.push('/agency/dashboard');
+            console.log('Register successful:', user)
+            if (user.role === 'admin') {
+                router.push('/dashboard/admin');
+            } else if (user.role === 'client') {
+                router.push('/dashboard/client');
+            } else if (user.role === 'agency') {
+                router.push('/dashboard/agency');
             }
         } else {
-            console.error('Login failed:', data);
+            console.error('Login failed:', user);
         }
         } catch (error) {
         console.error('Error during login:', error);
@@ -103,17 +103,18 @@ export default function RegisterPage() {
                     }
                     className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                 >
-                    <option value="">Select Role</option>
+                    <option value="">You are a :</option>
                     <option value="agency">Agency</option>
                     <option value="client">Client</option>
                 </select>
+                <p className="block text-sm font-medium text-gray-700">Already have an account ? </p><Link href="/auth/login" className="">Login</Link>
                 <button type="submit" 
                 className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 disabled:opacity-50"
                 disabled={loading}>
                     {loading ? 
                     (<div className="w-5 h-5 border-2 border-white border-t-transparent rouned-full animate-spin"></div>): ('Register')}
                 </button>
-            </div>(
+            </div>
         </form>
     )
 }

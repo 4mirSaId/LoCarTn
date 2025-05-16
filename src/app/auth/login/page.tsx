@@ -27,20 +27,19 @@ export default function LoginPage() {
             },
             body: JSON.stringify(formData)
         });
-        const data = await res.json()
         if (res.ok) {
-            console.log('Login successful:', data)
+            const user = await res.json()
             // Handle successful login (e.g., redirect, show success message)
-            localStorage.setItem('role', data.role);
-            if (data.role === 'admin') {
-                router.push('/admin/dashboard');
-            } else if (data.role === 'client') {
-                router.push('/client/dashboard');
-            } else if (data.role === 'uagency') {
-                router.push('/agency/dashboard');
+            console.log('Login successful:', user)
+            if (user.role === 'admin') {
+                router.push('/dashboard/admin');
+            } else if (user.role === 'client') {
+                router.push('/dashboard/client');
+            } else if (user.role === 'uagency') {
+                router.push('/dashboard/agency');
             }
         } else {
-            console.error('Login failed:', data);
+            console.error('Login failed:', user);
         }
         } catch (error) {
         console.error('Error during login:', error);
