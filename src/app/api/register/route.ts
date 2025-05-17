@@ -2,18 +2,18 @@
 import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
-  const { name, email, password, role, agencyName, licenseNumber } = await request.json();
+  const { name, email, password, role, agencyName, licenseNumber, phone } = await request.json();
 
-  // Replace with your actual registration logic and database insertion
-  if (!email || !password || !name) {
+  
+  if (!email || !password || !name || !phone) {
     return NextResponse.json(
       { message: 'Missing required fields' },
       { status: 400 }
     );
   }
 
-  // Check if user already exists (in a real app, query your database)
-  const userExists = false; // Replace with actual check
+  
+  const userExists = false;
 
   if (userExists) {
     return NextResponse.json(

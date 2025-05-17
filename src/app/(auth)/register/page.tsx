@@ -7,6 +7,7 @@ import Link from 'next/link';
 export default function RegisterPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [userType, setUserType] = useState<'CLIENT' | 'AGENCY'>('CLIENT');
   const [error, setError] = useState('');
@@ -24,13 +25,14 @@ export default function RegisterPage() {
         },
         body: JSON.stringify({ 
           name, 
-          email, 
+          email,
+          phone, 
           password,
           role: userType,
-          // Add agency-specific fields if needed
+          
           ...(userType === 'AGENCY' && {
-            agencyName: name, // or additional fields
-            licenseNumber: '12345' // example
+            agencyName: name, 
+            licenseNumber: '12345' 
           })
         }),
       });
@@ -116,6 +118,19 @@ export default function RegisterPage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700 mb-2" htmlFor="email">
+              Phone
+            </label>
+            <input
+              id="phone"
+              type="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
