@@ -6,7 +6,7 @@ import { useAuthStore } from '@/store/isAuth';
 
 type ProtectedRouteProps = {
   children: React.ReactNode;
-  allowedRoles?: ('ADMIN' | 'AGENCY' | 'CLIENT')[];
+  allowedRoles?: ('admin' | 'agency' | 'client')[];
 };
 
 const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
@@ -16,12 +16,12 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
   useEffect(() => {
     if (!isAuthenticated) {
       router.push('/login');
-    } else if (allowedRoles && !allowedRoles.includes(user?.role as 'ADMIN' | 'AGENCY' | 'CLIENT')) {
+    } else if (allowedRoles && !allowedRoles.includes(user?.role as 'admin' | 'agency' | 'client')) {
       router.push('/');
     }
   }, [isAuthenticated, user, router, allowedRoles]);
 
-  if (!isAuthenticated || (allowedRoles && !allowedRoles.includes(user?.role as 'ADMIN' | 'AGENCY' | 'CLIENT'))) {
+  if (!isAuthenticated || (allowedRoles && !allowedRoles.includes(user?.role as 'admin' | 'agency' | 'client'))) {
     return null;
   }
 

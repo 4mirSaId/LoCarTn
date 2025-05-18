@@ -14,7 +14,11 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    const payload = {
+      email,
+      password,
+      
+    };
 
     try {
       const response = await fetch('http://localhost:7000/api/auth/login', {
@@ -22,7 +26,7 @@ export default function LoginPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify(payload),
       });
 
       const data = await response.json();
@@ -32,14 +36,14 @@ export default function LoginPage() {
         
         // Redirect based on role
         switch(data.user.role) {
-          case 'ADMIN':
-            router.push('/admin');
+          case 'admin':
+            router.push('/dashboard/admin');
             break;
-          case 'AGENCY':
-            router.push('/agency');
+          case 'agency':
+            router.push('/dashboard/agency');
             break;
-          case 'CLIENT':
-            router.push('/dashboard');
+          case 'client':
+            router.push('/dashboard/client');
             break;
           default:
             router.push('/');

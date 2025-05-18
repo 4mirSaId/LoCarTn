@@ -9,13 +9,33 @@ export default function RegisterPage() {
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
-  const [userType, setUserType] = useState<'CLIENT' | 'AGENCY'>('CLIENT');
+  const [role, setRole] = useState<'client' | 'agency'>('client');
   const [error, setError] = useState('');
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    type RegisterPayload = {
+      email: string;
+      password: string;
+      name: string;
+      phone: string;
+      role: 'client' | 'agency';
+      agencyName?: string;
+      licenseNumber?: string;
+    };
+
+    const payload: RegisterPayload = {
+      email,
+      password,
+      name,
+      phone,
+      role,
+    };
+    if (role === 'agency') {
+      payload.agencyName = name;
+      payload.licenseNumber = '12345';
+    }
 
     try {
       const response = await fetch('http://localhost:7000/api/auth/register', {
@@ -23,18 +43,7 @@ export default function RegisterPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ 
-          name, 
-          email,
-          phone, 
-          password,
-          role: userType,
-          
-          ...(userType === 'AGENCY' && {
-            agencyName: name, 
-            licenseNumber: '12345' 
-          })
-        }),
+        body: JSON.stringify(payload),
       });
 
       const data = await response.json();
@@ -66,8 +75,8 @@ export default function RegisterPage() {
                   type="radio"
                   className="form-radio"
                   name="userType"
-                  checked={userType === 'CLIENT'}
-                  onChange={() => setUserType('CLIENT')}
+                  checked={role === 'client'}
+                  onChange={() => setRole('client')}
                 />
                 <span className="ml-2">Client</span>
               </label>
@@ -76,8 +85,8 @@ export default function RegisterPage() {
                   type="radio"
                   className="form-radio"
                   name="userType"
-                  checked={userType === 'AGENCY'}
-                  onChange={() => setUserType('AGENCY')}
+                  checked={role === 'agency'}
+                  onChange={() => setRole('agency')}
                 />
                 <span className="ml-2">Car Agency</span>
               </label>
@@ -85,7 +94,7 @@ export default function RegisterPage() {
           </div>
           <div className="mb-4">
             <label className="block text-gray-700 mb-2" htmlFor="name">
-              {userType === 'AGENCY' ? 'Agency Name' : 'Full Name'}
+              {role === 'agency' ? 'Agency Name' : 'Full Name'}
             </label>
             <input
               id="name"
@@ -96,7 +105,7 @@ export default function RegisterPage() {
               required
             />
           </div>
-          {userType === 'AGENCY' && (
+          {role === 'agency' && (
             <div className="mb-4">
               <label className="block text-gray-700 mb-2" htmlFor="license">
                 License Number

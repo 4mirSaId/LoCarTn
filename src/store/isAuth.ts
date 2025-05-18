@@ -2,7 +2,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-type UserRole = 'ADMIN' | 'AGENCY' | 'CLIENT';
+type UserRole = 'admin' | 'agency' | 'client';
 
 type User = {
   id: string;

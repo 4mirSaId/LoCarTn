@@ -7,10 +7,10 @@ export default function ClientDashboard() {
   const { user } = useAuthStore();
   
   return (
-    <ProtectedRoute allowedRoles={['CLIENT']}>
+    <ProtectedRoute allowedRoles={['client']}>
       <div className="min-h-screen bg-gray-100 p-8">
         <div className="max-w-6xl mx-auto bg-white p-8 rounded-lg shadow-md">
-          <h1 className="text-2xl font-bold mb-6">Client Dashboard</h1>
+          <h1 className="text-2xl font-bold mb-6">Admin space</h1>
           <p className="mb-4">Welcome, {user?.name}!</p>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
