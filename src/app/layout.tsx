@@ -1,6 +1,7 @@
+
 import '../styles/globals.css';
 import type { Metadata } from 'next';
-
+import ProviderWrapper from './ProviderWraper';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
@@ -22,14 +23,17 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
-      <body className="flex flex-col min-h-screen">
-        <Navbar />
-        <main className="flex-grow">
+    <ProviderWrapper>
+      <html lang="en">
+        <body className="flex flex-col min-h-screen">
+          <Navbar />
+          <main className="flex-grow">
             {children}
-        </main>
-        <Footer />
-      </body>
-    </html>
+          </main>
+          <Footer />
+        </body>
+      </html>
+    </ProviderWrapper>
+    
   )
 }

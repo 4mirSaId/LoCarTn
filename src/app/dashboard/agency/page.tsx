@@ -4,6 +4,7 @@
 'use client';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { useAuthStore } from '@/store/isAuth';
+import Link from 'next/link';
 
 export default function AgencyDashboard() {
   const { user } = useAuthStore();
@@ -16,10 +17,10 @@ export default function AgencyDashboard() {
           <p className="mb-4">Welcome, {user?.name}!</p>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-blue-100 p-4 rounded-lg">
+            <Link href='agency/myCars' className="bg-blue-100 p-4 rounded-lg">
               <h2 className="text-xl font-semibold mb-2">My Cars</h2>
               <p>Manage your car listings</p>
-            </div>
+            </Link>
             <div className="bg-green-100 p-4 rounded-lg">
               <h2 className="text-xl font-semibold mb-2">Reservations</h2>
               <p>View and manage reservations</p>
