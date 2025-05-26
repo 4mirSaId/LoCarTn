@@ -21,18 +21,18 @@ export default function AgencyDashboard() {
               <h2 className="text-xl font-semibold mb-2">My Cars</h2>
               <p>Manage your car listings</p>
             </Link>
-            <div className="bg-green-100 p-4 rounded-lg">
+            <Link href='agency/reservations' className="bg-green-100 p-4 rounded-lg">
               <h2 className="text-xl font-semibold mb-2">Reservations</h2>
               <p>View and manage reservations</p>
-            </div>
-            <div className="bg-yellow-100 p-4 rounded-lg">
+            </Link>
+            <Link href='agency/earnings' className="bg-yellow-100 p-4 rounded-lg">
               <h2 className="text-xl font-semibold mb-2">Earnings</h2>
               <p>View your earnings and payments</p>
-            </div>
-            <div className="bg-purple-100 p-4 rounded-lg">
+            </Link>
+            <Link href='agency/profile' className="bg-purple-100 p-4 rounded-lg">
               <h2 className="text-xl font-semibold mb-2">Agency Profile</h2>
               <p>Update your agency information</p>
-            </div>
+            </Link>
           </div>
         </div>
       </div>

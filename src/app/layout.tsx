@@ -1,4 +1,3 @@
-
 import '../styles/globals.css';
 import type { Metadata } from 'next';
 import ProviderWrapper from './ProviderWraper';
@@ -23,17 +22,16 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <ProviderWrapper>
-      <html lang="en">
-        <body className="flex flex-col min-h-screen">
+    <html lang="en">
+      <body className="flex flex-col min-h-screen">
+        <ProviderWrapper>
           <Navbar />
           <main className="flex-grow">
             {children}
           </main>
           <Footer />
-        </body>
-      </html>
-    </ProviderWrapper>
-    
+        </ProviderWrapper>
+      </body>
+    </html>
   )
 }

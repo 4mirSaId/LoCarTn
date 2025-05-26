@@ -1,91 +1,117 @@
 'use client';
 import Image from 'next/image';
-import { useState } from 'react';
-import { useDispatch } from 'react-redux';
-import type { ThunkDispatch } from 'redux-thunk';
-import type { AnyAction } from 'redux';
-import { addCar } from '../../redux/actions/carActions';
-import type { RootState } from '../../redux/store';
+import React, { useState, useEffect } from 'react';
+import axios from '../../../../../axios';
+import { useAuthStore } from '@/store/isAuth';
 
 interface AddCarFormProps {
-  agencyId?: string;
+  onCarAdded: () => void;
 }
 
-const AddCarForm = ({ agencyId }: AddCarFormProps) => {
-  const dispatch: ThunkDispatch<RootState, unknown, AnyAction> = useDispatch();
-
-  const [brand, setBrand] = useState('');
-  const [model, setModel] = useState('');
-  const [year, setYear] = useState('');
-  const [pricePerDay, setPricePerDay] = useState('');
-  const [image, setImage] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [error, setError] = useState('');
+const AddCarForm = ({ onCarAdded }: AddCarFormProps) => {
+  const user = useAuthStore((state) => state.user);
+  const token = useAuthStore((state) => state.token);
+  const [form, setForm] = useState<{
+    brand: string;
+    model: string;
+    year: string;
+    pricePerDay: string;
+    image: File | null;
+  }>({
+    brand: '',
+    model: '',
+    year: '',
+    pricePerDay: '',
+    image: null,
+  });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
-    const file = e.target.files && e.target.files[0];
-    if (file) {
-      // Validate image
-      if (file.size > 5 * 1024 * 1024) { // 5MB limit
-        setError('Image must be less than 5MB');
-        return;
-      }
-      if (!file.type.match('image.*')) {
-        setError('Please upload an image file');
-        return;
-      }
-      
-      setImage(file);
-      setImagePreview(URL.createObjectURL(file));
-      setError('');
+  useEffect(() => {
+    // Remove agency from form state, since backend sets it from req.user._id
+  }, [user]);
+
+
+  
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value, files } = e.target;
+    if (name === 'image' && files) {
+      const file = files[0];
+      setForm(f => ({ ...f, image: file }));
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(typeof reader.result === 'string' ? reader.result : null);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setForm(f => ({ ...f, [name]: value }));
     }
   };
 
 
-
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setError('');
-
-    // Validation
-    if (!brand || !model || !year || !pricePerDay || !image) {
-      setError('Please fill in all fields and upload an image');
+    setError(null);
+    setSuccess(null);
+    if (!token) {
+      setError('You must be logged in as an agency to add a car.');
       setIsSubmitting(false);
       return;
     }
-
     try {
-      const formData = new FormData();
-      formData.append('brand', brand);
-      formData.append('model', model);
-      formData.append('year', year);
-      formData.append('pricePerDay', pricePerDay);
-      formData.append('image', image);
-      if (agencyId) {
-        formData.append('agencyId', agencyId);
-      } else {
-        setError('User not authenticated. Please log in again.');
-        setIsSubmitting(false);
-        return;
-      }
+      const data = new FormData();
+      data.append('brand', form.brand);
+      data.append('model', form.model);
+      data.append('year', form.year);
+      data.append('pricePerDay', form.pricePerDay);
+      if (form.image) data.append('image', form.image);
 
-      await dispatch(addCar(formData));
-      
-      // Reset form on success
-      setBrand('');
-      setModel('');
-      setYear('');
-      setPricePerDay('');
-      setImage(null);
-      setImagePreview(null);
-    } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message || 'Failed to add car. Please try again.');
+      const response = await axios.post('/api/cars', data, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (response.data && (response.data.error || response.data.message)) {
+        setError(
+          typeof response.data.error === 'object'
+            ? JSON.stringify(response.data.error)
+            : response.data.error || response.data.message
+        );
+        setSuccess(null);
       } else {
-        setError('Failed to add car. Please try again.');
+        setError(null);
+        setSuccess('Car added successfully!');
+        setForm({ brand: '', model: '', year: '', pricePerDay: '', image: null });
+        setImagePreview(null);
+        onCarAdded();
+      }
+    } catch (err) {
+      // TypeScript-safe error handling
+      let errData: any = null;
+      if (
+        err &&
+        typeof err === 'object' &&
+        'response' in err &&
+        err.response &&
+        typeof err.response === 'object' &&
+        'data' in err.response
+      ) {
+        // @ts-expect-error: dynamic error shape from axios
+        errData = err.response.data;
+      }
+      if (errData) {
+        setError(
+          typeof errData.error === 'object'
+            ? JSON.stringify(errData.error)
+            : errData.error || errData.message || 'Failed to add car'
+        );
+        setSuccess(null);
+      } else {
+        setError('Failed to add car');
+        setSuccess(null);
       }
     } finally {
       setIsSubmitting(false);
@@ -96,13 +122,18 @@ const AddCarForm = ({ agencyId }: AddCarFormProps) => {
     <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-bold mb-6 text-gray-800">Add New Car</h2>
       
-      {error && (
-        <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
-          {error}
-        </div>
-      )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded mb-2">
+            {error}
+          </div>
+        )}
+        {success && (
+          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-2 rounded mb-2">
+            {success}
+          </div>
+        )}
         {/* Brand Input */}
         <div>
           <label htmlFor="brand" className="block text-sm font-medium text-gray-700 mb-1">
@@ -110,9 +141,10 @@ const AddCarForm = ({ agencyId }: AddCarFormProps) => {
           </label>
           <input
             id="brand"
+            name="brand"
             type="text"
-            value={brand}
-            onChange={(e) => setBrand(e.target.value)}
+            value={form.brand}
+            onChange={handleChange}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
           />
@@ -125,9 +157,10 @@ const AddCarForm = ({ agencyId }: AddCarFormProps) => {
           </label>
           <input
             id="model"
+            name="model"
             type="text"
-            value={model}
-            onChange={(e) => setModel(e.target.value)}
+            value={form.model}
+            onChange={handleChange}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
           />
@@ -141,11 +174,12 @@ const AddCarForm = ({ agencyId }: AddCarFormProps) => {
             </label>
             <input
               id="year"
+              name="year"
               type="number"
               min="1990"
               max={new Date().getFullYear() + 1}
-              value={year}
-              onChange={(e) => setYear(e.target.value)}
+              value={form.year}
+              onChange={handleChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
@@ -158,11 +192,12 @@ const AddCarForm = ({ agencyId }: AddCarFormProps) => {
             </label>
             <input
               id="price"
+              name="pricePerDay"
               type="number"
               min="1"
               step="0.01"
-              value={pricePerDay}
-              onChange={(e) => setPricePerDay(e.target.value)}
+              value={form.pricePerDay}
+              onChange={handleChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
@@ -176,9 +211,10 @@ const AddCarForm = ({ agencyId }: AddCarFormProps) => {
           </label>
           <input
             id="image"
+            name="image"
             type="file"
             accept="image/*"
-            onChange={handleImageChange}
+            onChange={handleChange}
             className="block w-full text-sm text-gray-500
               file:mr-4 file:py-2 file:px-4
               file:rounded-md file:border-0
@@ -192,8 +228,8 @@ const AddCarForm = ({ agencyId }: AddCarFormProps) => {
               <Image
                 width={200}
                 height={200}
-                src={imagePreview} 
-                alt="Car preview" 
+                src={imagePreview || ''}
+                alt="Car preview"
                 className="h-40 w-full object-contain rounded border border-gray-200"
               />
               <p className="text-xs text-gray-500 mt-1">Image Preview</p>
