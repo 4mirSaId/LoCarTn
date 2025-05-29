@@ -56,19 +56,19 @@ const ReservationForm: React.FC<ReservationFormProps> = ({ carId, pricePerDay, o
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-2 p-4 border rounded bg-gray-50">
-      {error && <div className="text-red-600 text-sm">{error}</div>}
-      {success && <div className="text-green-600 text-sm">{success}</div>}
+    <form onSubmit={handleSubmit} className="space-y-2 p-2 border rounded bg-gray-50 text-sm max-w-xs mx-auto">
+      {error && <div className="text-red-600 text-xs">{error}</div>}
+      {success && <div className="text-green-600 text-xs">{success}</div>}
       <div>
-        <label className="block text-sm font-medium">From</label>
-        <input type="date" value={from} onChange={e => setFrom(e.target.value)} className="border rounded px-2 py-1 w-full" required />
+        <label className="block font-medium">From</label>
+        <input type="date" value={from} onChange={e => setFrom(e.target.value)} className="border rounded px-2 py-1 w-full text-xs" required />
       </div>
       <div>
-        <label className="block text-sm font-medium">To</label>
-        <input type="date" value={to} onChange={e => setTo(e.target.value)} className="border rounded px-2 py-1 w-full" required />
+        <label className="block font-medium">To</label>
+        <input type="date" value={to} onChange={e => setTo(e.target.value)} className="border rounded px-2 py-1 w-full text-xs" required />
       </div>
-      <div className="text-sm text-gray-700">Total: <span className="font-semibold">${cost}</span></div>
-      <button type="submit" disabled={isSubmitting} className="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700 disabled:opacity-60">
+      <div className="text-gray-700">Total: <span className="font-semibold">{cost}Dt</span></div>
+      <button type="submit" disabled={isSubmitting} className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 disabled:opacity-60 text-xs">
         {isSubmitting ? 'Reserving...' : 'Reserve'}
       </button>
     </form>

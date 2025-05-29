@@ -188,7 +188,7 @@ const AddCarForm = ({ onCarAdded }: AddCarFormProps) => {
           {/* Price Input */}
           <div>
             <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">
-              Price/Day ($) *
+              Price/Day (Dt) *
             </label>
             <input
               id="price"

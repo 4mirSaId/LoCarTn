@@ -121,7 +121,7 @@ export default function CarList({ cars, loading, error, refreshCars }: CarListPr
                   </div>
                 ) : (
                   <div className="flex items-center space-x-2">
-                    <span className="font-medium">${car.pricePerDay}</span>
+                    <span className="font-medium">{car.pricePerDay}DT</span>
                     <span className="text-gray-500 text-sm">/day</span>
                     <button
                       onClick={() => { setEditingCarId(car._id); setNewPrice(car.pricePerDay.toString()); }}
