@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function DELETE(req: NextRequest) {
-  const backendUrl = process.env.BACKEND_URL || 'http://localhost:7000';
+  const backendUrl = process.env.BACKEND_URL || 'https://locartn.onrender.com';
   const url = new URL(req.url);
   const agencyId = url.pathname.split('/').pop();
   // Prefer Authorization header, fallback to cookie

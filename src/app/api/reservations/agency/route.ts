@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
   const authHeader = request.headers.get('authorization');
-  const backendResponse = await fetch(`${process.env.BACKEND_URL || 'http://localhost:7000'}/api/reservations/agency`, {
+  const backendResponse = await fetch(`${process.env.BACKEND_URL || 'https://locartn.onrender.com'}/api/reservations/agency`, {
     method: 'GET',
     headers: {
       ...(authHeader ? { authorization: authHeader } : {}),

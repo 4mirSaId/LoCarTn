@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
     const backendRes = await axios.get(
-      `${process.env.BACKEND_URL || 'http://localhost:7000'}/api/admin/reservations`,
+      `${process.env.BACKEND_URL || 'https://locartn.onrender.com'}/api/admin/reservations`,
       {
         headers: { Authorization: `Bearer ${token}` },
         withCredentials: true,

@@ -4,7 +4,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
   const { id } = await params;
   const authHeader = request.headers.get('authorization');
   const body = await request.json();
-  const backendResponse = await fetch(`${process.env.BACKEND_URL || 'http://localhost:7000'}/api/reservations/${id}`, {
+  const backendResponse = await fetch(`${process.env.BACKEND_URL || 'https://locartn.onrender.com'}/api/reservations/${id}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
