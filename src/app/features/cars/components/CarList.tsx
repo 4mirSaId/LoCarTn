@@ -37,9 +37,8 @@ export default function CarList({ cars, loading, error, refreshCars }: CarListPr
         headers: { Authorization: `Bearer ${token}` },
       });
       refreshCars();
-    } catch (err) {
-      const errorMsg = typeof err === 'object' && err && 'response' in err && err.response && typeof err.response === 'object' && 'data' in err.response ? (err.response as any).data?.message : 'Failed to delete car';
-      alert(errorMsg);
+    } catch {
+      alert('Failed to delete car');
     }
   };
 
@@ -55,9 +54,8 @@ export default function CarList({ cars, loading, error, refreshCars }: CarListPr
       setEditingCarId(null);
       setNewPrice('');
       refreshCars();
-    } catch (err) {
-      const errorMsg = typeof err === 'object' && err && 'response' in err && err.response && typeof err.response === 'object' && 'data' in err.response ? (err.response as any).data?.message : 'Failed to update price';
-      alert(errorMsg);
+    } catch {
+      alert('Failed to update price');
     }
   };
 

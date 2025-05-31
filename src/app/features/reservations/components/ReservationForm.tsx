@@ -44,12 +44,8 @@ const ReservationForm: React.FC<ReservationFormProps> = ({ carId, pricePerDay, o
       setFrom('');
       setTo('');
       onSuccess();
-    } catch (err) {
-      let msg = 'Failed to reserve car';
-      if (err && typeof err === 'object' && 'response' in err && err.response && typeof err.response === 'object' && 'data' in err.response) {
-        msg = (err.response as any).data?.message || msg;
-      }
-      setError(msg);
+    } catch {
+      setError('Failed to reserve car');
     } finally {
       setIsSubmitting(false);
     }

@@ -69,50 +69,19 @@ const AddCarForm = ({ onCarAdded }: AddCarFormProps) => {
       data.append('pricePerDay', form.pricePerDay);
       if (form.image) data.append('image', form.image);
 
-      const response = await axios.post('/api/cars', data, {
+      await axios.post('/api/cars', data, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-      if (response.data && (response.data.error || response.data.message)) {
-        setError(
-          typeof response.data.error === 'object'
-            ? JSON.stringify(response.data.error)
-            : response.data.error || response.data.message
-        );
-        setSuccess(null);
-      } else {
-        setError(null);
-        setSuccess('Car added successfully!');
-        setForm({ brand: '', model: '', year: '', pricePerDay: '', image: null });
-        setImagePreview(null);
-        onCarAdded();
-      }
-    } catch (err) {
-      // TypeScript-safe error handling
-      let errData: any = null;
-      if (
-        err &&
-        typeof err === 'object' &&
-        'response' in err &&
-        err.response &&
-        typeof err.response === 'object' &&
-        'data' in err.response
-      ) {
-        // @ts-expect-error: dynamic error shape from axios
-        errData = err.response.data;
-      }
-      if (errData) {
-        setError(
-          typeof errData.error === 'object'
-            ? JSON.stringify(errData.error)
-            : errData.error || errData.message || 'Failed to add car'
-        );
-        setSuccess(null);
-      } else {
-        setError('Failed to add car');
-        setSuccess(null);
-      }
+      setError(null);
+      setSuccess('Car added successfully!');
+      setForm({ brand: '', model: '', year: '', pricePerDay: '', image: null });
+      setImagePreview(null);
+      onCarAdded();
+    } catch {
+      setError('Failed to add car');
+      setSuccess(null);
     } finally {
       setIsSubmitting(false);
     }

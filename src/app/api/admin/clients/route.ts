@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
     );
     return NextResponse.json(backendRes.data);
   } catch (error) {
-    const err = error as any;
+    const err = error as { response?: { status?: number; data?: { message?: string } }; message?: string };
     const status = err.response?.status || 500;
     const message = err.response?.data?.message || err.message || 'Error fetching clients';
     return NextResponse.json({ message }, { status });

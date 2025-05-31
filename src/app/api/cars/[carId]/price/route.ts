@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 
-export async function PATCH(request: NextRequest, { params }: { params: { carId: string } }) {
-    const { carId } = params;
+export async function PATCH(request: NextRequest, context: { params: Promise<{ carId: string }> }) {
+    const { carId } = await context.params;
     const authHeader = request.headers.get('authorization');
     const contentType = request.headers.get('content-type') || '';
 
-    let body: any;
+    let body: string | FormData;
     const headers: Record<string, string> = {
         ...(authHeader ? { 'authorization': authHeader } : {}),
     };
