@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-export async function GET(request: NextRequest, { params }: { params: { agencyId: string } }) {
-  const { agencyId } = params;
+export async function GET(request: NextRequest, context: { params: { agencyId: string } }) {
+  const { agencyId } = context.params;
   const authHeader = request.headers.get('authorization');
   const backendResponse = await fetch(`https://locartn.onrender.com/api/admin/agencies/${agencyId}/cars`, {
     method: 'GET',
