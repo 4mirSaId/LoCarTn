@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-export async function GET(request: NextRequest, context: { params: Record<string, string> }) {
-  const { agencyId } = context.params;
+// Next.js expects the second argument to be { params }: { params: Record<string, string> }
+export async function GET(request: NextRequest, { params }: { params: Record<string, string> }) {
+  const { agencyId } = params;
   const authHeader = request.headers.get('authorization');
   const backendResponse = await fetch(`https://locartn.onrender.com/api/admin/agencies/${agencyId}/cars`, {
     method: 'GET',
