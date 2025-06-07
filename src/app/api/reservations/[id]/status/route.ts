@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   console.log('PATCH proxy hit for reservationId:', params);
   const { id } = await params;
   const authHeader = request.headers.get('authorization');
