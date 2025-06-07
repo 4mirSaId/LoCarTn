@@ -1,12 +1,13 @@
 'use client'
 import { useRouter } from "next/navigation";
-import { useAuthStore } from "@/store/isAuth";
 import Image from "next/image";
 import About from "./about";
+import { useAppSelector } from './features/redux/hooks';
 
 export default function Home() {
   const router = useRouter();
-  const { isAuthenticated, user } = useAuthStore();
+  const user = useAppSelector((state) => state.auth.user);
+  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
 
   const handleGetStarted = (e: React.MouseEvent) => {
     e.preventDefault();

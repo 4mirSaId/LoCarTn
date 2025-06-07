@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import axios from "@/../axios";
-import { useAuthStore } from "@/store/isAuth";
+import { useAppSelector } from '../../../features/redux/hooks';
 
 interface Client {
   _id: string;
@@ -15,7 +15,8 @@ const AdminClientsPage = () => {
   const [clients, setClients] = useState<Client[]>([]);
   const [sort, setSort] = useState<'created' | 'name'>('created');
   const [order, setOrder] = useState<'asc' | 'desc'>('desc');
-  const { token } = useAuthStore();
+  const user = useAppSelector((state) => state.auth.user);
+  const token = user?.token;
 
   useEffect(() => {
     const fetchClients = async () => {

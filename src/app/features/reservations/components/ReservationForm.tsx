@@ -1,20 +1,24 @@
 import React, { useState } from 'react';
-import axios from '../../../../../axios';
-import { useAuthStore } from '@/store/isAuth';
+import { useAppDispatch, useAppSelector } from '../../redux/hooks';
+import { createReservation } from '../../redux/reservationSlice';
 
 interface ReservationFormProps {
   carId: string;
+  agencyId: string;
   pricePerDay: number;
+  caution: number;
   onSuccess: () => void;
 }
 
-const ReservationForm: React.FC<ReservationFormProps> = ({ carId, pricePerDay, onSuccess }) => {
-  const token = useAuthStore((state) => state.token);
+const ReservationForm: React.FC<ReservationFormProps> = ({ carId, pricePerDay, caution, onSuccess }) => {
+  const user = useAppSelector((state) => state.auth.user);
+  const token = user?.token;
+  const dispatch = useAppDispatch();
+  const { loading, error, success } = useAppSelector((state) => state.reservation);
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+  const [validationError, setValidationError] = useState<string | null>(null);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const calcDays = () => {
     if (!from || !to) return 0;
@@ -24,37 +28,54 @@ const ReservationForm: React.FC<ReservationFormProps> = ({ carId, pricePerDay, o
     return Math.ceil((toDate.getTime() - fromDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
   };
 
-  const cost = pricePerDay * calcDays();
+  const cost = (pricePerDay * calcDays()) + caution;
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    setError(null);
-    setSuccess(null);
-    if (!token) {
-      setError('You must be logged in as a client to reserve.');
-      setIsSubmitting(false);
-      return;
-    }
-    try {
-      await axios.post(`/api/reservations/${carId}`, { from, to }, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setSuccess('Reservation submitted!');
+  React.useEffect(() => {
+    if (success) {
       setFrom('');
       setTo('');
       onSuccess();
-    } catch {
-      setError('Failed to reserve car');
-    } finally {
-      setIsSubmitting(false);
+      setShowSuccess(true);
+      const timer = setTimeout(() => setShowSuccess(false), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [success, onSuccess, dispatch]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setValidationError(null);
+    try {
+      await dispatch(createReservation({ carId, from, to, token })).unwrap();
+    } catch (err) {
+      const errorMsg =
+        typeof err === 'string'
+          ? err
+          : (err as { message?: string })?.message || 'Reservation failed.';
+      if (errorMsg.includes('Not available')) {
+        setValidationError('Not available for these days!');
+      } else {
+        setValidationError(errorMsg);
+      }
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-2 p-2 border rounded bg-gray-50 text-sm max-w-xs mx-auto">
+    <form onSubmit={handleSubmit} className="space-y-2 p-2 border rounded bg-gray-50 text-sm max-w-xs mx-auto relative">
+      {showSuccess && (
+        <div className="absolute top-0 left-0 w-full flex items-center justify-between bg-green-100 border border-green-400 text-green-700 px-4 py-2 rounded mb-2 z-50">
+          <span>Reserved with success, please check your reservations and wait for the agency to confirm your request</span>
+          <button
+            type="button"
+            className="ml-4 text-green-900 hover:text-green-700 font-bold text-lg focus:outline-none"
+            onClick={() => setShowSuccess(false)}
+            aria-label="Close"
+          >
+            &times;
+          </button>
+        </div>
+      )}
+      {validationError && <div className="text-red-600 text-xs">{validationError}</div>}
       {error && <div className="text-red-600 text-xs">{error}</div>}
-      {success && <div className="text-green-600 text-xs">{success}</div>}
       <div>
         <label className="block font-medium">From</label>
         <input type="date" value={from} onChange={e => setFrom(e.target.value)} className="border rounded px-2 py-1 w-full text-xs" required />
@@ -64,8 +85,8 @@ const ReservationForm: React.FC<ReservationFormProps> = ({ carId, pricePerDay, o
         <input type="date" value={to} onChange={e => setTo(e.target.value)} className="border rounded px-2 py-1 w-full text-xs" required />
       </div>
       <div className="text-gray-700">Total: <span className="font-semibold">{cost}Dt</span></div>
-      <button type="submit" disabled={isSubmitting} className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 disabled:opacity-60 text-xs">
-        {isSubmitting ? 'Reserving...' : 'Reserve'}
+      <button type="submit" disabled={loading} className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 disabled:opacity-60 text-xs">
+        {loading ? 'Reserving...' : 'Reserve'}
       </button>
     </form>
   );

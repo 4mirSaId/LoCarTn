@@ -2,11 +2,11 @@
 // It is protected by the ProtectedRoute component
 'use client';
 import ProtectedRoute from '@/components/ProtectedRoute';
-import { useAuthStore } from '@/store/isAuth';
+import { useAppSelector } from '../../features/redux/hooks';
 import Link from 'next/link';
 
 export default function AdminDashboard() {
-  const { user } = useAuthStore();
+  const user = useAppSelector((state) => state.auth.user);
 
   return (
     <ProtectedRoute allowedRoles={['admin']}>

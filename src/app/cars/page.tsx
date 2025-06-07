@@ -4,7 +4,7 @@ import  CarList  from "./AllCarsList";
 const CarPage = () => {
     return (
         <div>
-            <h1 className="text-3xl font-bold mb-6">Cars</h1>
+            <h1 className="text-3xl font-bold mb-6 text-center">Cars</h1>
             <CarList />
         </div>
     );

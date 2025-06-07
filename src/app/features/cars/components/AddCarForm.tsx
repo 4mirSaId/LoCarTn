@@ -1,40 +1,51 @@
 'use client';
 import Image from 'next/image';
 import React, { useState, useEffect } from 'react';
-import axios from '../../../../../axios';
-import { useAuthStore } from '@/store/isAuth';
+import { useAppDispatch, useAppSelector } from '../../redux/hooks';
+import { addCar, resetCarState } from '../../redux/carSlice';
 
 interface AddCarFormProps {
   onCarAdded: () => void;
 }
 
 const AddCarForm = ({ onCarAdded }: AddCarFormProps) => {
-  const user = useAuthStore((state) => state.user);
-  const token = useAuthStore((state) => state.token);
+  const user = useAppSelector((state) => state.auth.user);
+  const token = user?.token;
+  const dispatch = useAppDispatch();
+  const { loading, error, success } = useAppSelector((state) => state.car);
   const [form, setForm] = useState<{
     brand: string;
     model: string;
     year: string;
     pricePerDay: string;
+    caution: string;
+    location: string; // <-- add location
     image: File | null;
   }>({
     brand: '',
     model: '',
     year: '',
     pricePerDay: '',
+    caution: '',
+    location: '', // <-- add location
     image: null,
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+  const [validationError, setValidationError] = useState<string | null>(null);
 
   useEffect(() => {
     // Remove agency from form state, since backend sets it from req.user._id
   }, [user]);
 
+  useEffect(() => {
+    if (success) {
+      setForm({ brand: '', model: '', year: '', pricePerDay: '', caution: '', location: '', image: null });
+      setImagePreview(null);
+      onCarAdded();
+      dispatch(resetCarState());
+    }
+  }, [success, onCarAdded, dispatch]);
 
-  
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, files } = e.target;
     if (name === 'image' && files) {
@@ -50,49 +61,37 @@ const AddCarForm = ({ onCarAdded }: AddCarFormProps) => {
     }
   };
 
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
-    setError(null);
-    setSuccess(null);
+    setValidationError(null);
     if (!token) {
-      setError('You must be logged in as an agency to add a car.');
-      setIsSubmitting(false);
+      setValidationError('You must be logged in as an agency to add a car.');
       return;
     }
-    try {
-      const data = new FormData();
-      data.append('brand', form.brand);
-      data.append('model', form.model);
-      data.append('year', form.year);
-      data.append('pricePerDay', form.pricePerDay);
-      if (form.image) data.append('image', form.image);
-
-      await axios.post('/api/cars', data, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      setError(null);
-      setSuccess('Car added successfully!');
-      setForm({ brand: '', model: '', year: '', pricePerDay: '', image: null });
-      setImagePreview(null);
-      onCarAdded();
-    } catch {
-      setError('Failed to add car');
-      setSuccess(null);
-    } finally {
-      setIsSubmitting(false);
+    if (!form.brand || !form.model || !form.year || !form.pricePerDay || !form.caution || !form.location || !form.image) {
+      setValidationError('All fields are required.');
+      return;
     }
+    const formData = new FormData();
+    formData.append('brand', form.brand);
+    formData.append('model', form.model);
+    formData.append('year', form.year);
+    formData.append('pricePerDay', form.pricePerDay);
+    formData.append('caution', form.caution);
+    formData.append('location', form.location); // <-- add location
+    formData.append('image', form.image);
+    dispatch(addCar({ formData, token }));
   };
 
   return (
     <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-bold mb-6 text-gray-800">Add New Car</h2>
-      
-
       <form onSubmit={handleSubmit} className="space-y-4">
+        {validationError && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded mb-2">
+            {validationError}
+          </div>
+        )}
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded mb-2">
             {error}
@@ -100,7 +99,7 @@ const AddCarForm = ({ onCarAdded }: AddCarFormProps) => {
         )}
         {success && (
           <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-2 rounded mb-2">
-            {success}
+            Car added successfully!
           </div>
         )}
         {/* Brand Input */}
@@ -171,6 +170,39 @@ const AddCarForm = ({ onCarAdded }: AddCarFormProps) => {
               required
             />
           </div>
+          {/* Caution Input */}
+          <div>
+            <label htmlFor="caution" className="block text-sm font-medium text-gray-700 mb-1">
+              Caution (Dt) *
+            </label>
+            <input
+              id="caution"
+              name="caution"
+              type="number"
+              min="1"
+              step="0.01"
+              value={form.caution}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </div>
+        </div>
+
+        {/* Location Input */}
+        <div>
+          <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-1">
+            Location *
+          </label>
+          <input
+            id="location"
+            name="location"
+            type="text"
+            value={form.location}
+            onChange={handleChange}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
         </div>
 
         {/* Image Upload */}
@@ -210,12 +242,12 @@ const AddCarForm = ({ onCarAdded }: AddCarFormProps) => {
         <div className="pt-2">
           <button
             type="submit"
-            disabled={isSubmitting}
+            disabled={loading}
             className={`w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
-              isSubmitting ? 'opacity-70 cursor-not-allowed' : ''
+              loading ? 'opacity-70 cursor-not-allowed' : ''
             }`}
           >
-            {isSubmitting ? (
+            {loading ? (
               <span className="flex items-center justify-center">
                 <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>

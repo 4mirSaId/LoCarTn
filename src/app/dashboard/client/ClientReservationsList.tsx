@@ -1,7 +1,7 @@
 'use client'
 import React, { useEffect, useState } from 'react';
 import axios from '../../../../axios';
-import { useAuthStore } from '@/store/isAuth';
+import { useAppSelector } from '../../features/redux/hooks';
 
 interface Reservation {
   _id: string;
@@ -11,15 +11,18 @@ interface Reservation {
     year: number;
     pricePerDay: number;
     imageUrl?: string;
+    agency?: { name: string };
   };
   period: { from: string; to: string };
   cost: number;
   status: string;
   createdAt: string;
+  agencyName?: string;
 }
 
 const ClientReservationsList: React.FC = () => {
-  const token = useAuthStore((state) => state.token);
+  const user = useAppSelector((state) => state.auth.user);
+  const token = user?.token;
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -54,9 +57,18 @@ const ClientReservationsList: React.FC = () => {
         <ul className="space-y-4">
           {reservations.map((r) => (
             <li key={r._id} className="p-4 border rounded bg-white shadow">
-              <div className="font-semibold">{r.carId.brand} {r.carId.model} ({r.carId.year})</div>
+              <div className="font-semibold">
+                {r.carId ? (
+                  <>
+                    {r.carId.brand} {r.carId.model} ({r.carId.year})
+                  </>
+                ) : (
+                  <span className="text-gray-400">Unknown Car</span>
+                )}
+              </div>
               <div className="text-sm text-gray-500">From: {new Date(r.period.from).toLocaleDateString()} To: {new Date(r.period.to).toLocaleDateString()}</div>
               <div className="text-sm">Cost: <span className="font-semibold">${r.cost}</span></div>
+              <div className="text-sm">Agency: <span className="font-semibold">{r.agencyName || r.carId?.agency?.name || 'N/A'}</span></div>
               <div className="text-sm">Status: <span className={`font-semibold ${r.status === 'pending' ? 'text-yellow-600' : r.status === 'confirmed' ? 'text-green-600' : 'text-red-600'}`}>{r.status}</span></div>
               <div className="text-xs text-gray-400 mt-1">Reserved on: {new Date(r.createdAt).toLocaleString()}</div>
             </li>

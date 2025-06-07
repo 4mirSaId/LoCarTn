@@ -1,14 +1,14 @@
 'use client';
 
-import { useAuthStore } from '@/store/isAuth';
+import { useAppSelector } from '../../../features/redux/hooks';
 import AddCarForm from '../../../features/cars/components/AddCarForm';
 import CarList from '../../../features/cars/components/CarList';
 import { useState, useEffect, useCallback } from 'react';
 import axios from '../../../../../axios';
 
 export default function AgencyCarsPage() {
-  const user = useAuthStore((state) => state.user);
-  const token = useAuthStore((state) => state.token);
+  const user = useAppSelector((state) => state.auth.user);
+  const token = user?.token;
   const [cars, setCars] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

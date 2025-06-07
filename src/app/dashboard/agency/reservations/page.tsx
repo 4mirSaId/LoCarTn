@@ -1,7 +1,7 @@
 'use client'
 import React, { useEffect, useState } from 'react';
 import axios from '../../../../../axios';
-import { useAuthStore } from '@/store/isAuth';
+import { useAppSelector } from '../../../features/redux/hooks';
 
 interface Reservation {
   _id: string;
@@ -24,7 +24,8 @@ interface Reservation {
 }
 
 const AgencyReservationsList: React.FC = () => {
-  const token = useAuthStore((state) => state.token);
+  const user = useAppSelector((state) => state.auth.user);
+  const token = user?.token;
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

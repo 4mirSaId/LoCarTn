@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import axios from "@/../axios";
-import { useAuthStore } from "@/store/isAuth";
+import { useAppSelector } from '../../../features/redux/hooks';
 
 interface Reservation {
   _id: string;
@@ -26,7 +26,8 @@ const AdminReservationsPage = () => {
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
-  const { token } = useAuthStore();
+  const user = useAppSelector((state) => state.auth.user);
+  const token = user?.token;
 
   useEffect(() => {
     const fetchReservations = async () => {

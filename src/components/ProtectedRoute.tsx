@@ -2,7 +2,7 @@
 'use client';
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuthStore } from '@/store/isAuth';
+import { useAppSelector } from '@/app/features/redux/hooks';
 
 type ProtectedRouteProps = {
   children: React.ReactNode;
@@ -11,7 +11,8 @@ type ProtectedRouteProps = {
 
 const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
   const router = useRouter();
-  const { isAuthenticated, user } = useAuthStore();
+  const user = useAppSelector((state) => state.auth.user);
+  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
 
   useEffect(() => {
     if (!isAuthenticated) {

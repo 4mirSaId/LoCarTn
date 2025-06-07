@@ -2,15 +2,16 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuthStore } from '@/store/isAuth';
 import Link from 'next/link';
+import { useAppDispatch } from '../../features/redux/hooks';
+import { login as reduxLogin } from '../../features/redux/authSlice';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const router = useRouter();
-  const { login } = useAuthStore();
+  const reduxDispatch = useAppDispatch();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,7 +22,7 @@ export default function LoginPage() {
     };
 
     try {
-      const response = await fetch('https://locartn.onrender.com/api/auth/login', {
+      const response = await fetch('http://localhost:7000/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -32,8 +33,16 @@ export default function LoginPage() {
       const data = await response.json();
 
       if (response.ok) {
-        login(data.user, data.token);
-        
+        // Map backend user to Redux AuthUser shape
+        const userForRedux = {
+          id: data.user.id || data.user._id,
+          name: data.user.name,
+          email: data.user.email,
+          role: data.user.role,
+          agencyId: data.user.agencyId,
+          token: data.token,
+        };
+        reduxDispatch(reduxLogin(userForRedux));
         // Redirect based on role
         switch(data.user.role) {
           case 'admin':

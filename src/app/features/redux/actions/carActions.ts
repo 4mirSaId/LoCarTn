@@ -10,7 +10,7 @@ export const addCar = (FormData: FormData) => async (dispatch: Dispatch) => {
             },
         };
 
-        const { data } = await axios.post('https://locartn.onrender.com/api/cars', FormData, config);
+        const { data } = await axios.post('http://localhost:7000/api/cars', FormData, config);
         dispatch({ type: 'ADD_CAR_SUCCESS', payload: data });
     } catch (error) {
         let errorMessage = "An unknown error occurred";

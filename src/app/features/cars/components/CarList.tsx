@@ -1,8 +1,8 @@
 'use client';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import axios from '../../../../../axios';
-import { useAuthStore } from '@/store/isAuth';
+import { useAppSelector } from '../../redux/hooks';
 
 interface Car {
   _id: string;
@@ -10,6 +10,7 @@ interface Car {
   model: string;
   year: number;
   pricePerDay: number;
+  caution: number;
   isRented: boolean;
   imageUrl: string;
 }
@@ -22,9 +23,18 @@ interface CarListProps {
 }
 
 export default function CarList({ cars, loading, error, refreshCars }: CarListProps) {
-  const token = useAuthStore((state) => state.token);
+  const user = useAppSelector((state) => state.auth.user);
+  const token = user?.token;
   const [editingCarId, setEditingCarId] = useState<string | null>(null);
   const [newPrice, setNewPrice] = useState<string>('');
+  const [imgSrcs, setImgSrcs] = useState<Record<string, string>>(() =>
+    Object.fromEntries(cars.map((car) => [car._id, car.imageUrl || '/car-placeholder.jpg']))
+  );
+
+  // Update imgSrcs if cars prop changes
+  useEffect(() => {
+    setImgSrcs(Object.fromEntries(cars.map((car) => [car._id, car.imageUrl || '/car-placeholder.jpg'])));
+  }, [cars]);
 
   const handleDelete = async (carId: string) => {
     if (!token) {
@@ -83,16 +93,27 @@ export default function CarList({ cars, loading, error, refreshCars }: CarListPr
           <div key={car._id} className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 hover:shadow-lg transition-shadow">
             <div className="relative h-48 w-full">
               <Image
-                src={car.imageUrl || '/car-placeholder.jpg'}
+                src={
+                  imgSrcs[car._id] && imgSrcs[car._id].trim() !== ''
+                    ? imgSrcs[car._id]
+                    : '/rental.png'
+                }
                 alt={`${car.brand} ${car.model}`}
                 className="object-cover w-full h-full"
                 width={400}
                 height={300}
+                onError={() =>
+                  setImgSrcs((prev) => ({
+                    ...prev,
+                    [car._id]: '/car-placeholder.jpg',
+                  }))
+                }
               />
             </div>
             <div className="p-4">
               <h3 className="text-lg font-semibold text-gray-800">{car.brand} {car.model}</h3>
               <p className="text-gray-600 text-sm mb-2">Year: {car.year}</p>
+              <p className="text-gray-600 text-sm mb-2">Caution: {car.caution}DT</p>
               <div className="flex items-center justify-between mt-3">
                 {editingCarId === car._id ? (
                   <div className="flex items-center space-x-2">
