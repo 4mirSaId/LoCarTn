@@ -12,9 +12,11 @@ export default function RegisterPage() {
   const [role, setRole] = useState<'client' | 'agency'>('client');
   const [error, setError] = useState('');
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
     type RegisterPayload = {
       email: string;
       password: string;
@@ -56,6 +58,8 @@ export default function RegisterPage() {
     } catch (err) {
       setError('An error occurred during registration');
       console.error('Registration error:', err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -157,11 +161,13 @@ export default function RegisterPage() {
               required
             />
           </div>
+          <p className="text-gray-600">You must login after registering.</p>
           <button
             type="submit"
+            disabled={loading}
             className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
           >
-            Register
+            {loading ? 'Registering...' : 'Register'}
           </button>
         </form>
         <div className="mt-4 text-center">

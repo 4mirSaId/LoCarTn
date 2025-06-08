@@ -12,9 +12,11 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const router = useRouter();
   const reduxDispatch = useAppDispatch();
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
     const payload = {
       email,
       password,
@@ -63,6 +65,8 @@ export default function LoginPage() {
     } catch (err) {
       setError('An error occurred during login');
       console.error('Login error:', err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -100,9 +104,10 @@ export default function LoginPage() {
           </div>
           <button
             type="submit"
+            disabled={loading}
             className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
           >
-            Login
+            {loading ? 'Logging in...' : 'Login'}
           </button>
         </form>
         <div className="mt-4 text-center">
