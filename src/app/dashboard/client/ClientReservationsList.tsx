@@ -45,8 +45,22 @@ const ClientReservationsList: React.FC = () => {
     fetchReservations();
   }, [token]);
 
-  if (loading) return <div>Loading reservations...</div>;
-  if (error) return <div className="text-red-600">{error}</div>;
+   if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+        {error}
+      </div>
+    );
+  }
+
 
   return (
     <div>
@@ -67,7 +81,7 @@ const ClientReservationsList: React.FC = () => {
                 )}
               </div>
               <div className="text-sm text-gray-500">From: {new Date(r.period.from).toLocaleDateString()} To: {new Date(r.period.to).toLocaleDateString()}</div>
-              <div className="text-sm">Cost: <span className="font-semibold">${r.cost}</span></div>
+              <div className="text-sm">Cost: <span className="font-semibold">{r.cost}DT</span></div>
               <div className="text-sm">Agency: <span className="font-semibold">{r.agencyName || r.carId?.agency?.name || 'N/A'}</span></div>
               <div className="text-sm">Status: <span className={`font-semibold ${r.status === 'pending' ? 'text-yellow-600' : r.status === 'confirmed' ? 'text-green-600' : 'text-red-600'}`}>{r.status}</span></div>
               <div className="text-xs text-gray-400 mt-1">Reserved on: {new Date(r.createdAt).toLocaleString()}</div>
